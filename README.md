@@ -4,7 +4,7 @@
 
 <p><strong>An end-to-end RNA-seq analysis of iron-deficiency responses in <em>Arabidopsis thaliana</em></strong></p>
 
-[![Archive checks](https://github.com/Ci-yo/BIO211_CW2/actions/workflows/archive-check.yml/badge.svg)](https://github.com/Ci-yo/BIO211_CW2/actions/workflows/archive-check.yml)
+[![Archive checks](https://github.com/Ci-yo/BIO211_CW2_RNAseq/actions/workflows/archive-check.yml/badge.svg)](https://github.com/Ci-yo/BIO211_CW2_RNAseq/actions/workflows/archive-check.yml)
 ![R](https://img.shields.io/badge/R-DESeq2-276DC3?logo=r&logoColor=white)
 ![Shell](https://img.shields.io/badge/pipeline-Bash-4EAA25?logo=gnubash&logoColor=white)
 ![Species](https://img.shields.io/badge/species-Arabidopsis%20thaliana-6A994E)
@@ -81,7 +81,7 @@ Every stage leaves a compact, inspectable output in the repository. The full raw
 ## Repository guide
 
 ```text
-BIO211_CW2/
+BIO211_CW2_RNAseq/
 |-- README.md                    visual project overview
 |-- environment.yml             Conda/Bioconda environment
 |-- .github/workflows/           automatic archive checks
