@@ -30,7 +30,7 @@ The practical subset is linked to GEO series [GSE163190](https://www.ncbi.nlm.ni
 | STAR alignment | 90.76-91.29% uniquely mapped | Consistent mapping across all six samples |
 | Total mapping | 98.65-99.00% | Data quality supports downstream quantification |
 | Differential expression | 453 genes at FDR < 0.05 | 227 up-regulated, 226 down-regulated |
-| GO input set | 189 genes | 137 up and 52 down at `padj < 0.01`, `|log2FC| >= 1` |
+| GO input set | 189 genes | 137 up and 52 down at `padj < 0.01`, `\|log2FC\| >= 1` |
 | Functional signal | stress up, photosynthesis down | Coherent response to iron limitation |
 
 ## A visual tour of the evidence
