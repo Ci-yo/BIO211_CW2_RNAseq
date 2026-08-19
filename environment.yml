@@ -1,0 +1,19 @@
+name: bio211-rnaseq
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - fastqc
+  - multiqc
+  - trim-galore
+  - star
+  - samtools
+  - subread
+  - stringtie
+  - gffcompare
+  - igvtools
+  - r-base=4.2
+  - bioconductor-deseq2
+  - bioconductor-clusterprofiler
+  - bioconductor-org.at.tair.db
+  - r-ggplot2

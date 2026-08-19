@@ -1,0 +1,13 @@
+Status	C1	C2	C3	T1	T2	T3
+Assigned	648849	647894	646131	648015	645211	646532
+Unassigned_Unmapped	0	0	0	0	0	0
+Unassigned_MappingQuality	0	0	0	0	0	0
+Unassigned_Chimera	0	0	0	0	0	0
+Unassigned_FragmentLength	0	0	0	0	0	0
+Unassigned_Duplicate	0	0	0	0	0	0
+Unassigned_MultiMapping	127274	126247	126936	122712	124039	123714
+Unassigned_Secondary	0	0	0	0	0	0
+Unassigned_Nonjunction	0	0	0	0	0	0
+Unassigned_NoFeatures	13447	13443	13394	14861	15287	14653
+Unassigned_Overlapping_Length	0	0	0	0	0	0
+Unassigned_Ambiguity	23522	23884	23908	24575	24619	24354

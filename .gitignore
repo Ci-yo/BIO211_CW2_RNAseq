@@ -1,0 +1,44 @@
+# Raw sequencing data and archives
+data/raw/
+*.fastq
+*.fastq.gz
+*.fq
+*.fq.gz
+*.zip
+*.tgz
+*.tar.gz
+
+# Large alignment and genome-browser files
+*.bam
+*.bai
+*.sam
+*.tdf
+
+# Reference genomes and indices
+reference/
+*.fa
+*.fasta
+*.fna
+*.fai
+*.gtf
+*.gff
+*.gff3
+STAR_index/
+
+# Generated QC and intermediate output
+work/
+fastqc_output/
+multiqc_data/
+*_fastqc.html
+*_fastqc.zip
+*.log
+*.out
+*.tab
+
+# R state and editor/system files
+.Rhistory
+.RData
+.Rproj.user/
+.DS_Store
+Thumbs.db
+~$*
