@@ -16,6 +16,138 @@
 
 </div>
 
+## Step-by-step guide
+
+Choose a route before installing the full environment:
+
+| Route | Needed inputs | What you can do |
+|---|---|---|
+| A: inspect the published analysis | Only this repository and Python 3.10+ | Validate archived counts/results and read the six-sample comparison. |
+| B: rerun GO enrichment | Included gene lists plus the R environment | Recalculate enrichment from the retained strict gene sets. |
+| C: start from reads | The exact six teaching FASTQs and matching TAIR10 reference files, supplied separately | Align, quantify, run DESeq2 and optionally inspect transcript assemblies. |
+
+### 1. Download and check the archive
+
+In a **terminal** with [Git](https://git-scm.com/downloads) and
+[Python](https://www.python.org/downloads/) installed:
+
+```bash
+git clone https://github.com/Ci-yo/BIO211_CW2_RNAseq.git
+cd BIO211_CW2_RNAseq
+python scripts/validate_archive.py
+```
+
+Start with [`data/results/deseq2_results_with_normalized_counts.tsv`](data/results/deseq2_results_with_normalized_counts.tsv)
+and [`docs/analysis-notes.md`](docs/analysis-notes.md). The archive records
+453 genes at FDR < 0.05 and 189 genes in the stricter GO input set.
+This check requires no FASTQ files, R or aligner.
+
+### 2. Set up the analysis environment
+
+For routes B/C, use **Linux or WSL2 on Windows**, with Conda/Bioconda.
+Run these commands in that Linux shell, not native PowerShell:
+
+```bash
+conda env create -f environment.yml
+conda activate bio211-rnaseq
+```
+
+The environment includes command-line tools and the R/Bioconductor packages
+used by the scripts. It specifies R 4.2 but is not an exact package lockfile.
+For route B, the included gene lists are sufficient:
+
+```bash
+Rscript scripts/04_go_enrichment.R
+```
+
+Read `data/results/go_up_bp.tsv`, `go_down_bp.tsv` and the corresponding MF/CC
+tables. Non-empty enrichments also produce `figures/differential-expression/go_*.png`.
+Annotation-package changes can alter enrichment results.
+
+### 3. Prepare the external inputs for a read-level rerun
+
+For route C, create the directories:
+
+```bash
+mkdir -p data/raw reference
+```
+
+Place these files in them:
+
+```text
+data/raw/C1.fastq  C2.fastq  C3.fastq  T1.fastq  T2.fastq  T3.fastq
+reference/TAIR10.toplevel.fa
+reference/TAIR10.gtf
+reference/TAIR10.chrom.sizes   # needed for the IGV/TDF assembly branch
+```
+
+The script expects six **uncompressed single-end** FASTQs: C1–C3 are controls;
+T1–T3 are iron-deficiency samples. The exact teaching subset and its full
+accession-to-file mapping are not distributed here. GSE163190 provides study
+context, not an automatic download that recreates these files. Do not rename
+arbitrary study runs to these sample names and assume an exact reproduction.
+
+### 4. Align and generate the missing count-matrix step
+
+```bash
+bash scripts/01_qc_alignment.sh
+mkdir -p work/featurecounts
+```
+
+Confirm the library strandedness from the original library metadata before
+counting. Set `STRAND` to `0` (unstranded), `1` (forward) or `2` (reverse)
+accordingly; the archive does not establish which setting generated the
+original count matrix. With that shell variable set:
+
+```bash
+read -r -p "Confirmed library strandedness (0, 1 or 2): " STRAND
+featureCounts -T 8 -s "${STRAND:?Set STRAND from your library metadata}" \
+  -t exon -g gene_id -a reference/TAIR10.gtf \
+  -o work/featurecounts/feature.txt \
+  work/bam/C1.bam work/bam/C2.bam work/bam/C3.bam \
+  work/bam/T1.bam work/bam/T2.bam work/bam/T3.bam
+```
+
+The `-t`/`-g` choices require exon records with a `gene_id` attribute in the
+matching GTF. Check that contract and chromosome naming before counting.
+The saved featureCounts summary is not the per-gene matrix needed by DESeq2.
+Do not substitute the archived **normalised** counts for raw integer counts.
+
+### 5. Run differential expression and optional assembly
+
+```bash
+Rscript scripts/03_differential_expression.R
+Rscript scripts/04_go_enrichment.R
+```
+
+DESeq2 reads `work/featurecounts/feature.txt`, compares treatment with control,
+and overwrites the retained result tables, gene sets and DE figures. Use a
+separate clone if you want to compare against the untouched archive.
+
+For the transcript-assembly/IGV branch, after alignment:
+
+```bash
+bash scripts/02_transcript_assembly.sh C1
+```
+
+This assembles **C1 only**, writes StringTie/gffcompare outputs under
+`work/assembly/`, and makes TDF tracks from available BAMs under `work/tdf/`.
+Repeat with another sample name only if that analysis is needed.
+
+### 6. Inspect outputs and troubleshoot
+
+| Stage / symptom | Output or action |
+|---|---|
+| QC and alignment | `work/fastqc_raw/`, `work/fastqc_trimmed/`, `work/multiqc/`, `work/bam/`; inspect mapping summaries before modelling. |
+| `Missing featureCounts file` | Complete step 4; alignment alone does not generate gene counts. |
+| `Missing samples` in DESeq2 | Confirm the count matrix contains C1–C3 and T1–T3 BAM column names. |
+| No reads assigned | Check GTF/FASTA compatibility, chromosome names, feature attributes and strandedness. |
+| Command not found on Windows | Run the Conda workflow in Linux/WSL2, with `bio211-rnaseq` activated. |
+| Rerun differs from 453 DE genes | Check exact input subset, count settings and package versions; the archive is not a complete bit-for-bit environment. |
+
+See [data/README.md](data/README.md) for data availability and the interpretation
+below for the candidate-isoform limitation.
+
 ## The project in one minute
 
 This repository turns a compact six-library teaching dataset into a reproducible RNA-seq case study. Three control libraries (`C1-C3`) are compared with three iron-deficiency libraries (`T1-T3`) to trace the analysis from read quality to biological interpretation.
@@ -103,30 +235,6 @@ BIO211_CW2_RNAseq/
 |   `-- differential-expression/
 `-- references/                  dataset and method citations
 ```
-
-## Reproduce the workflow
-
-```bash
-conda env create -f environment.yml
-conda activate bio211-rnaseq
-```
-
-Place `C1.fastq` ... `T3.fastq` in `data/raw/`, then place `TAIR10.toplevel.fa`, `TAIR10.gtf` and `TAIR10.chrom.sizes` in `reference/`.
-
-```bash
-bash scripts/01_qc_alignment.sh
-bash scripts/02_transcript_assembly.sh C1
-Rscript scripts/03_differential_expression.R
-Rscript scripts/04_go_enrichment.R
-```
-
-For a quick integrity check that requires only Python:
-
-```bash
-python scripts/validate_archive.py
-```
-
-The same validation runs automatically on every push and pull request through GitHub Actions.
 
 ## Data philosophy
 
